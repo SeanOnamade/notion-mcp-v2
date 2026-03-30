@@ -11,25 +11,52 @@ from .config import (
 notion = Client(auth=NOTION_API_KEY)
 
 
+def _resolve_data_source_id(database_id: str) -> str:
+    """Find the data_source ID for a given database ID (Notion API 2025+)."""
+    results = notion.search(
+        query="",
+        filter={"value": "data_source", "property": "object"},
+    )
+    for r in results.get("results", []):
+        parent = r.get("parent", {})
+        if parent.get("database_id") == database_id:
+            return r["id"]
+    raise ValueError(
+        f"No data source found for database {database_id}. "
+        "Make sure the database is shared with your integration."
+    )
+
+
+_data_source_id_cache: dict[str, str] = {}
+
+
+def _get_data_source_id(database_id: str) -> str:
+    if database_id not in _data_source_id_cache:
+        _data_source_id_cache[database_id] = _resolve_data_source_id(database_id)
+    return _data_source_id_cache[database_id]
+
+
 def get_tasks_for_day(weekday: str) -> list[dict]:
     """Query Upcoming Tasks DB for a given weekday + Pinned tasks, excluding completed ones."""
-    response = notion.databases.query(
-        database_id=NOTION_TASKS_DB_ID,
-        filter={
-            "and": [
-                {
-                    "or": [
-                        {"property": "Weekday", "select": {"equals": weekday}},
-                        {"property": "Weekday", "select": {"equals": "Pinned"}},
-                    ]
-                },
-                {
-                    "and": [
+    ds_id = _get_data_source_id(NOTION_TASKS_DB_ID)
+    response = notion.request(
+        path=f"data_sources/{ds_id}/query",
+        method="POST",
+        body={
+            "filter": {
+                "and": [
+                    {
+                        "or": [
+                            {"property": "Weekday", "select": {"equals": weekday}},
+                            {"property": "Weekday", "select": {"equals": "Pinned"}},
+                        ]
+                    },
+                    *[
                         {"property": "Status", "select": {"does_not_equal": s}}
                         for s in EXCLUDED_STATUSES
-                    ]
-                },
-            ]
+                    ],
+                ]
+            }
         },
     )
 
