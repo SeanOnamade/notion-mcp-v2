@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from mcp.server.fastmcp import FastMCP
 
 from .config import WEEKDAY_MAP
-from .notion_ops import get_tasks_for_day, get_current_schedule, write_schedule
+from .notion_ops import get_tasks_for_day, get_tasks_with_details, get_current_schedule, write_schedule
 from .scheduler import generate_schedule, format_schedule_preview
 
 mcp = FastMCP(
@@ -66,7 +66,7 @@ def plan_day(day: str) -> str:
     global _pending_schedule
 
     weekday = _resolve_weekday(day)
-    tasks = get_tasks_for_day(weekday)
+    tasks = get_tasks_with_details(weekday)
 
     if not tasks:
         return f"No tasks found for {weekday}. Nothing to schedule."

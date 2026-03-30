@@ -89,6 +89,39 @@ def get_tasks_for_day(weekday: str) -> list[dict]:
     return tasks
 
 
+def get_task_details(page_id: str, max_blocks: int = 10) -> str:
+    """Read the body content of a task page (first N blocks) for extra context."""
+    try:
+        children = notion.blocks.children.list(block_id=page_id)
+    except Exception:
+        return ""
+
+    lines = []
+    for block in children["results"][:max_blocks]:
+        block_type = block.get("type", "")
+        content = block.get(block_type, {})
+        rich_text = content.get("rich_text", [])
+        text = "".join(t.get("plain_text", "") for t in rich_text).strip()
+        if text:
+            if block_type == "bulleted_list_item":
+                lines.append(f"  - {text}")
+            elif block_type == "numbered_list_item":
+                lines.append(f"  * {text}")
+            else:
+                lines.append(f"  {text}")
+    return "\n".join(lines)
+
+
+def get_tasks_with_details(weekday: str) -> list[dict]:
+    """Get tasks for a day with page body content included."""
+    tasks = get_tasks_for_day(weekday)
+    for task in tasks:
+        details = get_task_details(task["page_id"])
+        if details:
+            task["details"] = details
+    return tasks
+
+
 def _find_schedule_today_block() -> str | None:
     """Walk children of the schedule page to find the 'Schedule Today' toggle."""
     children = notion.blocks.children.list(block_id=NOTION_SCHEDULE_PAGE_ID)

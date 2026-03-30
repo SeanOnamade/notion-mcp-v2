@@ -52,6 +52,8 @@ def generate_schedule(
         line = f"- [{t['status']}] {t['name']}"
         if t.get("weekday") == "Pinned":
             line += " (Pinned/recurring)"
+        if t.get("details"):
+            line += f"\n  Details:\n{t['details']}"
         task_lines.append(line)
 
     user_msg = f"Tasks to schedule:\n" + "\n".join(task_lines)
