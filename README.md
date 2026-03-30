@@ -2,7 +2,29 @@
 
 An MCP server that turns your Notion task list into an AI-optimized daily schedule.
 
-Every night you pull tomorrow's tasks from your "Upcoming Tasks" database and manually slot them into half-hour blocks. This agent does that for you — it reads your tasks, understands priorities via the Eisenhower matrix, respects fixed-time commitments, and writes a clean schedule back to Notion.
+Every night you pull tomorrow's tasks from your "Upcoming Tasks" database and manually slot them into half-hour blocks. This agent does that for you — it reads your tasks (including page body content like workout plans and watchlists), understands priorities via the Eisenhower matrix, respects fixed-time commitments parsed from task names, and writes a clean schedule back to Notion.
+
+## Demo
+
+### 1. Tasks in Notion with Eisenhower priorities and weekday assignments
+
+![Upcoming Tasks database](screenshots/1-upcoming-tasks-database.png)
+
+### 2. The agent reads full page content for smarter scheduling
+
+![Task detail with body content](screenshots/2-task-detail-with-content.png)
+
+### 3. One command generates an AI-optimized daily schedule
+
+![CLI schedule generation](screenshots/4-cli-schedule-generation.png)
+
+### 4. Schedule written back to Notion as a half-hour block table
+
+![Schedule written to Notion](screenshots/3-schedule-written-to-notion.png)
+
+### 5. Built as an MCP server — usable from Claude Desktop, Cursor, or any MCP client
+
+![MCP server code](screenshots/5-mcp-server-code.png)
 
 ## How It Works
 
@@ -11,10 +33,11 @@ Every night you pull tomorrow's tasks from your "Upcoming Tasks" database and ma
 │  Upcoming Tasks  │──────▶│   AI Scheduler   │──────▶│  Schedule Today  │
 │  (Notion DB)     │       │   (OpenAI)       │       │  (Notion Table)  │
 │                  │       │                  │       │                  │
-│  • Task name     │       │  • Parses times  │       │  6:00  Morning   │
-│  • Priority      │       │  • Sorts by      │       │  6:30  Stretch   │
-│  • Weekday       │       │    priority      │       │  7:00  Deep work │
-│                  │       │  • Fills slots   │       │  ...             │
+│  • Task name     │       │  • Reads page    │       │  6:00  Free time │
+│  • Priority      │       │    body content  │       │  9:00  LeetCode  │
+│  • Weekday       │       │  • Parses times  │       │  9:30  Standup   │
+│  • Page content  │       │  • Sorts by      │       │ 10:00  Deep work │
+│                  │       │    priority      │       │  ...             │
 └──────────────────┘       └──────────────────┘       └──────────────────┘
 ```
 
@@ -28,6 +51,14 @@ Every night you pull tomorrow's tasks from your "Upcoming Tasks" database and ma
 | `In Progress` | Currently being worked on | Dedicated blocks |
 | `~Imp ~Urg` | Neither important nor urgent | Fill remaining gaps |
 | `Pinned` | Recurring/daily tasks | Spread across the day |
+
+### Key Features
+
+- **Deep content reading** — reads the body of each task page (bullet lists, paragraphs) so the AI understands what "Gym - upper body" actually involves
+- **Time-locked tasks** — parses times from task names (e.g. "Team standup 9:30am") and locks them to the correct slot
+- **Eisenhower priority** — schedules Important & Urgent tasks in peak focus hours, lighter tasks in the evening
+- **Two-step workflow** — preview the schedule before writing it to Notion
+- **MCP server** — any MCP client can invoke `plan_day`, `get_tasks`, and `apply_schedule`
 
 ## Setup
 
@@ -46,7 +77,7 @@ pip install -r requirements.txt
 ### 3. Share your Notion pages with the integration
 
 1. Open your **Upcoming Tasks** database in Notion
-2. Click **Share** → **Invite** → select your integration
+2. Click **...** → **Connections** → select your integration
 3. Do the same for your **Getting Things Done** page (the one with "Schedule Today")
 
 ### 4. Get your database and page IDs
@@ -132,7 +163,7 @@ Add to your `claude_desktop_config.json`:
 ## Tech Stack
 
 - **Python** — core language
-- **Notion API** via `notion-client` — reads task database, writes schedule table
+- **Notion API** via `notion-client` — reads task database + page content, writes schedule table
 - **OpenAI** (`gpt-4o-mini`) — intelligent scheduling with priority awareness
 - **MCP** (Model Context Protocol) via `mcp` SDK — exposes tools to any MCP client
 
@@ -141,7 +172,7 @@ Add to your `claude_desktop_config.json`:
 ```
 src/
   config.py        — environment config, time slots, priority mapping
-  notion_ops.py    — Notion API operations (read tasks, write schedule)
+  notion_ops.py    — Notion API operations (read tasks + page content, write schedule)
   scheduler.py     — OpenAI-powered schedule generation
   mcp_server.py    — MCP server entry point with tool definitions
   cli.py           — standalone CLI for direct usage
