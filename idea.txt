@@ -1,0 +1,80 @@
+How do I do that and should/can I use Cursor for it? Maybe something that helps me set up my daily schedule in Notion? I put all my tasks for a set of time -- this week, next week, this month, into databases, and every night I take the stuff for the next day from the this week one and manually type them into a basic table for every half hour of my day. Would making something that can do that for me be production level? Is it doable?
+
+This is actually a perfect project idea. Let me break down why and how:
+Why this is great for your resume:
+
+It solves a real problem you actually have — always makes for better projects
+It uses MCP (Notion's official MCP server exists) — which is cutting edge
+It's genuinely agentic — the AI reads your databases, reasons about priorities/timing, and writes the schedule back to Notion
+It's demonstrable in interviews ("I use this every day")
+
+Is it production-level? Yes, if you add:
+
+A clean UI or CLI to trigger it + review before it commits
+Error handling for edge cases (conflicting tasks, overloaded days)
+Some configurability (work hours, task duration estimates, priorities)
+Deployed somewhere, not just running locally
+
+Is it doable? Absolutely. Your stack would be something like:
+
+Cursor — yes, 100% use it, it's perfect for this
+Python + LangGraph or simple OpenAI function calling for the agent logic
+Notion MCP or Notion API to read/write databases
+FastAPI backend (you already know it)
+Simple React or Next.js frontend, or even just a CLI to start
+
+The core agent loop is:
+
+Read "This Week" Notion database
+Filter tasks for tomorrow
+Reason about timing/priority
+Write half-hour blocks into your daily table
+
+Cursor will accelerate this massively — you can basically describe each step in plain English and it'll scaffold the code. Given your background this could realistically be done in a weekend.
+Want me to help you spec out the exact architecture and what to name it?
+
+--
+
+Notion MCP Challenge
+
+Event Description
+The Prize
+*One winner will receive an exclusive invitation to chat with Ivan Zhao (CEO & Co-Founder of Notion) and $500 USD.
+*Two runner ups will receive $500 USD each.
+
+The Problem
+Your work is scattered: Code in an editor, plans in docs, tasks in messages, email, and calendar.
+
+Most AI tools sit outside of all of it, just guessing what you actually want. We know there’s a better way: When AI can use your context—and run across multiple tools you use every day—like Notion.
+
+The Challenge
+Notion is partnering with Major League Hacking to issue a challenge to hackers around the globe:
+
+Build the most impressive system or process using Notion MCP.
+It can be across any field: engineering, sales, finance, etc.
+We want to see your sick integrations!
+Here are just a few examples of what you can do:
+1. Build an iMessage assistant that has access to your Notion workspace.
+2. Automate a task in your browser, using a Notion page.
+3. Track your feature backlog in Notion, and let an agent take the first pass at it.
+
+Show us the workflow that makes you feel like you have superpowers.
+
+Learn more at our Notion AI Challenge Landing Page!
+
+Who can attend?
+Locations have different requirements for who can attend. This location is open to the following:
+
+Minors (Between 13-18) Working Professionals Students- University Students - Secondary/High School Students - Other
+Schedule
+Important Dates:
+
+March 4: Notion MCP Challenge begins!
+March 29: Submissions due at 11:59 PM PST (submit your project here)
+April 9: Winners Announced
+Additional Information
+Judging Criteria:
+
+Originality & Creativity
+Technical Complexity
+Use of Underlying Technology
